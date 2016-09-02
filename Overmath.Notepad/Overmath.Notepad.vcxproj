@@ -143,7 +143,6 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Overmath\overmath.h" />
     <ClInclude Include="Overmath.Notepad.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />

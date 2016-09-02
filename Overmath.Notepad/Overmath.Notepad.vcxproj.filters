@@ -30,9 +30,6 @@
     <ClInclude Include="Overmath.Notepad.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Overmath\overmath.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

@@ -178,6 +178,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     }
   }
   break;
+  case WM_SIZE:
+  {
+    RECT rcClient;
+    GetClientRect(hWnd, &rcClient);
+    
+    SetWindowPos(hInput, nullptr, 0, 0, rcClient.right / 2, rcClient.bottom, 0);
+    SetWindowPos(hOutput, nullptr, rcClient.right / 2, 0, rcClient.right / 2, rcClient.bottom, 0);
+  }
+  break;
   case WM_PAINT:
   {
     PAINTSTRUCT ps;

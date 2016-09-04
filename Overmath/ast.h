@@ -18,7 +18,8 @@ namespace overmath
   {
     vector<wstring> names;
     wstring type;
-    void render(wostringstream& buffer, const rendering_options& options) override {
+    void render(wostringstream& buffer, const rendering_options& options) override 
+    {
       for (int i = 0; i < names.size(); ++i)
       {
         buffer << type << " " << names[i];
@@ -42,7 +43,7 @@ namespace overmath
 
     void render(wostringstream& buffer, const rendering_options& options) override
     {
-      buffer << variable_being_assigned << " = " << value << ";";
+      buffer << variable_being_assigned << " = " << value;
     }
   };
 
@@ -90,6 +91,42 @@ namespace overmath
     }
   };
 
+  typedef boost::variant<assignment_statement, function> top_level_construct;
+
+  struct program : element
+  {
+    vector<top_level_construct> content;
+
+    struct render_generic : boost::static_visitor<>
+    {
+      wostringstream& buffer;
+      const rendering_options& options;
+
+      render_generic(wostringstream& buffer, const rendering_options& options)
+        : buffer(buffer),
+          options(options)
+      {
+      }
+
+      template <typename T> void operator()(T& t) const {
+        t.render(buffer, options);
+      }
+
+      template <> void operator()(assignment_statement& a) const
+      {
+        buffer << a.infer_type() << " ";
+        a.render(buffer, options);
+        buffer << ";\r\n";
+      }
+    };
+
+    void render(wostringstream& buffer, const rendering_options& options) override {
+      auto visitor = render_generic{ buffer, options };
+      for (auto& tlc : content)
+        apply_visitor(visitor, tlc);
+    }
+  };
+
   struct numeric_types_ : qi::symbols<wchar_t, wstring>
   {
     numeric_types_()
@@ -100,6 +137,11 @@ namespace overmath
     }
   } numeric_types;
 }
+
+BOOST_FUSION_ADAPT_STRUCT(
+  overmath::program,
+  (std::vector<overmath::top_level_construct>, content)
+)
 
 BOOST_FUSION_ADAPT_STRUCT(
   overmath::function,

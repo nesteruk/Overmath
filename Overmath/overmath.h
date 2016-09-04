@@ -15,9 +15,9 @@ namespace overmath
   namespace qi = boost::spirit::qi;
 
   template<typename Iterator>
-  struct function_parser : qi::grammar<Iterator, function(), space_type>
+  struct function_parser : qi::grammar<Iterator, program(), space_type>
   {
-    function_parser() : function_parser::base_type(start)
+    function_parser() : function_parser::base_type(program)
     {
       using qi::lit;
 
@@ -33,7 +33,7 @@ namespace overmath
         >> +(char_ - ';')
         >> ';';
 
-      start %= lit("void ")
+      function %= lit("void ")
         >> +(char_ - '(')
         >> '('
         >> *param
@@ -41,11 +41,14 @@ namespace overmath
         >> '{'
         >> *assignment
         >> '}';
+
+      program %= boost::spirit::eps >> *(function | assignment);
     }
 
     qi::rule<Iterator, parameter(), space_type> param;
     qi::rule<Iterator, assignment_statement(), space_type> assignment;
-    qi::rule<Iterator, function(), space_type> start;
+    qi::rule<Iterator, function(), space_type> function;
+    qi::rule<Iterator, program(), space_type> program;
   };
   
   // relies on boost fusion also
@@ -54,13 +57,13 @@ namespace overmath
   {
     using boost::spirit::qi::phrase_parse;
 
-    function f;
+    program p;
     function_parser<wstring::const_iterator> fp{};
-    auto b = phrase_parse(first, last, fp, space, f);
+    auto b = phrase_parse(first, last, fp, space, p);
     if (b)
     {
       wostringstream buffer;
-      f.render(buffer, rendering_options{});
+      p.render(buffer, rendering_options{});
       return buffer.str();
     }
     return wstring(L"FAIL");

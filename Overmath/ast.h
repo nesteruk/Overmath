@@ -14,6 +14,8 @@ namespace overmath
     virtual void render(wostringstream& buffer, const rendering_options& options) = 0;
   };
 
+  
+
   struct parameter : element
   {
     vector<wstring> names;
@@ -44,6 +46,21 @@ namespace overmath
     void render(wostringstream& buffer, const rendering_options& options) override
     {
       buffer << variable_being_assigned << " = " << value;
+    }
+  };
+
+  struct interface_declaration : element
+  {
+    wstring name;
+    vector<assignment_statement> assignments;
+
+    void render(wostringstream& buffer, const rendering_options& options) override {
+      buffer << "class " << name << "\r\n{\r\n";
+      buffer << "  virtual ~" << name << "() = default;\r\n";
+
+
+
+      buffer << "};\r\n";
     }
   };
 
@@ -91,7 +108,7 @@ namespace overmath
     }
   };
 
-  typedef boost::variant<assignment_statement, function> top_level_construct;
+  typedef boost::variant<assignment_statement, function, interface_declaration> top_level_construct;
 
   struct program : element
   {
@@ -141,6 +158,12 @@ namespace overmath
 BOOST_FUSION_ADAPT_STRUCT(
   overmath::program,
   (std::vector<overmath::top_level_construct>, content)
+)
+
+BOOST_FUSION_ADAPT_STRUCT(
+  overmath::interface_declaration,
+  (std::wstring, name),
+  (std::vector<overmath::assignment_statement>, assignments)
 )
 
 BOOST_FUSION_ADAPT_STRUCT(

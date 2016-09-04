@@ -17,38 +17,45 @@ namespace overmath
   template<typename Iterator>
   struct function_parser : qi::grammar<Iterator, program(), space_type>
   {
-    function_parser() : function_parser::base_type(program)
+    function_parser() : function_parser::base_type(program_rule)
     {
       using qi::lit;
 
-      param %=
+      parameter_rule %=
         +alnum % ','
         >> ':'
         >> numeric_types
         >> -char_(',');
 
-      assignment %=
+      assignment_statement_rule %=
         +alnum
         >> '='
         >> +(char_ - ';')
         >> ';';
 
-      function %= lit("void ")
+      function_rule %= lit("void ")
         >> +(char_ - '(')
         >> '('
-        >> *param
+        >> *parameter_rule
         >> ')'
         >> '{'
-        >> *assignment
+        >> *assignment_statement_rule
         >> '}';
 
-      program %= boost::spirit::eps >> *(function | assignment);
+      interface_declaration_rule %= 
+        lit("interface ") >> +(char_ - '{')
+        >> '{'
+        >> *assignment_statement_rule
+        >> '}';
+
+      program_rule %= boost::spirit::eps >> *(function_rule | assignment_statement_rule | interface_declaration_rule);
     }
 
-    qi::rule<Iterator, parameter(), space_type> param;
-    qi::rule<Iterator, assignment_statement(), space_type> assignment;
-    qi::rule<Iterator, function(), space_type> function;
-    qi::rule<Iterator, program(), space_type> program;
+    qi::rule<Iterator, parameter(), space_type> parameter_rule;
+    qi::rule<Iterator, assignment_statement(), space_type> assignment_statement_rule;
+    qi::rule<Iterator, function(), space_type> function_rule;
+    qi::rule<Iterator, interface_declaration(), space_type> interface_declaration_rule;
+    qi::rule<Iterator, program(), space_type> program_rule;
   };
   
   // relies on boost fusion also
